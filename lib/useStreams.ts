@@ -1,8 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { usePublicClient, useReadContracts } from "wagmi";
-import { STREAMVAULT_ADDRESS, streamVaultAbi, DEPLOY_BLOCK } from "./contracts";
+import { useReadContract, useReadContracts } from "wagmi";
+import { STREAMVAULT_ADDRESS, streamVaultAbi } from "./contracts";
 
 export type StreamRecord = {
   id: bigint;
@@ -19,51 +18,27 @@ const ZERO = "0x0000000000000000000000000000000000000000";
 export const isConfigured = STREAMVAULT_ADDRESS.toLowerCase() !== ZERO;
 
 /**
- * Discover every stream id involving `address`, as either sender or recipient,
- * from the indexed StreamCreated logs. We rely on logs (not on-chain
- * enumeration) to keep the contract minimal; Arc emits standard logs for this.
+ * Tìm stream bằng cách duyệt id (1..nextStreamId-1) và đọc qua multicall,
+ * rồi lọc theo ví đang kết nối. Tránh eth_getLogs — RPC công khai của Arc
+ * từ chối truy vấn dải block rộng với lỗi HTTP 413.
  */
-function useStreamIds(address?: `0x${string}`) {
-  const client = usePublicClient();
-  return useQuery({
-    queryKey: ["flux:ids", address, STREAMVAULT_ADDRESS],
-    enabled: Boolean(client && address && isConfigured),
-    refetchInterval: 15_000,
-    queryFn: async (): Promise<bigint[]> => {
-      const [sent, received] = await Promise.all([
-        client!.getContractEvents({
-          address: STREAMVAULT_ADDRESS,
-          abi: streamVaultAbi,
-          eventName: "StreamCreated",
-          args: { sender: address },
-          fromBlock: DEPLOY_BLOCK,
-          toBlock: "latest",
-        }),
-        client!.getContractEvents({
-          address: STREAMVAULT_ADDRESS,
-          abi: streamVaultAbi,
-          eventName: "StreamCreated",
-          args: { recipient: address },
-          fromBlock: DEPLOY_BLOCK,
-          toBlock: "latest",
-        }),
-      ]);
-      const ids = new Set<bigint>();
-      for (const log of [...sent, ...received]) {
-        const id = (log as { args: { id?: bigint } }).args.id;
-        if (id !== undefined) ids.add(id);
-      }
-      // Newest first.
-      return Array.from(ids).sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
-    },
-  });
-}
-
-/** Full, live stream records for the connected address. */
 export function useMyStreams(address?: `0x${string}`) {
-  const { data: ids, isLoading: idsLoading, refetch: refetchIds } = useStreamIds(address);
+  const {
+    data: nextId,
+    isLoading: idLoading,
+    refetch: refetchNext,
+  } = useReadContract({
+    address: STREAMVAULT_ADDRESS,
+    abi: streamVaultAbi,
+    functionName: "nextStreamId",
+    query: { enabled: isConfigured, refetchInterval: 15_000 },
+  });
 
-  const contracts = (ids ?? []).map((id) => ({
+  const count = nextId ? Number(nextId) - 1 : 0;
+  const ids: bigint[] = [];
+  for (let i = count; i >= 1; i--) ids.push(BigInt(i)); // mới nhất trước
+
+  const contracts = ids.map((id) => ({
     address: STREAMVAULT_ADDRESS,
     abi: streamVaultAbi,
     functionName: "getStream" as const,
@@ -80,7 +55,7 @@ export function useMyStreams(address?: `0x${string}`) {
   });
 
   const streams: StreamRecord[] = [];
-  (ids ?? []).forEach((id, i) => {
+  ids.forEach((id, i) => {
     const r = data?.[i];
     if (!r || r.status !== "success" || !r.result) return;
     const s = r.result as {
@@ -92,6 +67,13 @@ export function useMyStreams(address?: `0x${string}`) {
       endTime: bigint;
       cancelled: boolean;
     };
+    if (
+      address &&
+      s.sender.toLowerCase() !== address.toLowerCase() &&
+      s.recipient.toLowerCase() !== address.toLowerCase()
+    ) {
+      return; // không phải của mình
+    }
     streams.push({
       id,
       sender: s.sender,
@@ -106,9 +88,9 @@ export function useMyStreams(address?: `0x${string}`) {
 
   return {
     streams,
-    isLoading: idsLoading || (contracts.length > 0 && structsLoading),
+    isLoading: idLoading || (contracts.length > 0 && structsLoading),
     refetch: () => {
-      refetchIds();
+      refetchNext();
       refetchStructs();
     },
   };
