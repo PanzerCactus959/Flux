@@ -58,7 +58,7 @@ export function Footer() {
 
       <div className="border-t border-surface-line/60">
         <div className="mx-auto flex max-w-6xl flex-col justify-between gap-2 px-5 py-5 text-xs text-content-faint sm:flex-row">
-          <span>© 2025 Flux · Built on Arc</span>
+          <span>© 2026 Flux · Built on Arc</span>
           <span>Running on Arc testnet</span>
         </div>
       </div>
