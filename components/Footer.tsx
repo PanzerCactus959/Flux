@@ -32,6 +32,11 @@ export function Footer() {
             <div className="mb-3 text-content-faint">Resources</div>
             <ul className="space-y-2 text-content-muted">
               <li>
+                <Link href="/docs" className="transition hover:text-content-hi">
+                  Docs
+                </Link>
+              </li>
+              <li>
                 <a href={LINKS.github} target="_blank" rel="noreferrer" className="transition hover:text-content-hi">
                   GitHub
                 </a>

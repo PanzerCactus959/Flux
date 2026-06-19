@@ -12,6 +12,7 @@ const NAV = [
   { href: "/earnings", label: "Earnings" },
   { href: "/request", label: "Request" },
   { href: "/bridge", label: "Bridge" },
+  { href: "/docs", label: "Docs" },
 ];
 
 export function TopBar() {
