@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint"
   },
-  "dependencies": {
+ "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.9",
     "@tanstack/react-query": "^5.62.0",
     "next": "^15.1.0",
@@ -16,9 +16,9 @@
     "react-dom": "^19.0.0",
     "viem": "^2.38.0",
     "wagmi": "^2.19.0",
-    "@wagmi/core": "^2.16.0"
+    "@wagmi/core": "^2.16.0",
     "@circle-fin/bridge-kit": "^1.10.2",
-    "@circle-fin/adapter-viem-v2": "^1.11.2",
+    "@circle-fin/adapter-viem-v2": "^1.11.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
