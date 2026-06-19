@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useConnectorClient } from "wagmi";
+import { useAccount } from "wagmi";
 // Circle Bridge Kit — wraps CCTP V2 (approve → burn → attestation → mint).
 // Install: npm install @circle-fin/bridge-kit @circle-fin/adapter-viem-v2
 import { BridgeKit } from "@circle-fin/bridge-kit";
@@ -34,7 +34,7 @@ export function useSupportedChains() {
 type BridgeArgs = { fromChain: string; toChain: string; amount: string };
 
 export function useBridge() {
-  const { data: client } = useConnectorClient();
+  const { connector, isConnected } = useAccount();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,15 +44,24 @@ export function useBridge() {
     async ({ fromChain, toChain, amount }: BridgeArgs) => {
       setError(null);
       setResult(null);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const provider = (client as any)?.transport?.value?.provider;
-      if (!provider) {
+
+      if (!isConnected || !connector) {
         setError("Wallet not connected.");
         return;
       }
+
       setPending(true);
       try {
-        const adapter = await createAdapterFromProvider({ provider });
+        // Correct way to get the raw EIP-1193 provider in wagmi v2.
+        const provider = await connector.getProvider();
+        if (!provider) {
+          setError("Could not access the wallet provider.");
+          return;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const adapter = await createAdapterFromProvider({ provider: provider as any });
+
         const res = await kit.bridge({
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           from: { adapter, chain: fromChain as any },
@@ -70,8 +79,17 @@ export function useBridge() {
         setPending(false);
       }
     },
-    [client],
+    [connector, isConnected],
   );
 
-  return { bridge, pending, error, result, clear: () => { setError(null); setResult(null); } };
+  return {
+    bridge,
+    pending,
+    error,
+    result,
+    clear: () => {
+      setError(null);
+      setResult(null);
+    },
+  };
 }
