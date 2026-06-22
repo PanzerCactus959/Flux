@@ -59,6 +59,13 @@ export default function RequestPage() {
           just share and get paid.
         </p>
 
+        <Link
+          href="/page"
+          className="mt-4 inline-block rounded-xl border border-surface-line bg-surface px-4 py-2.5 text-sm text-content-muted transition hover:border-flow-peri hover:text-content-hi"
+        >
+          Want a permanent page with tiers instead? Create your Flux Page →
+        </Link>
+
         {!isConnected && (
           <div className="mt-6 rounded-xl2 border border-surface-line bg-surface p-5 text-sm text-content-muted">
             Tip: connect your wallet to auto-fill your address as the recipient.
