@@ -12,6 +12,8 @@ const TOC = [
   { id: "stream", label: "Open a stream" },
   { id: "withdraw", label: "Withdraw & cancel" },
   { id: "request", label: "Payment links" },
+  { id: "pages", label: "Flux Pages" },
+  { id: "embed", label: "Embed a button" },
   { id: "earnings", label: "Earnings & export" },
   { id: "bridge", label: "Bridge out (CCTP)" },
   { id: "faq", label: "FAQ" },
@@ -48,7 +50,6 @@ export default function DocsPage() {
           every feature.
         </p>
 
-        {/* Table of contents */}
         <nav className="mt-8 rounded-xl2 border border-surface-line bg-surface p-5">
           <div className="mb-3 text-xs uppercase tracking-wide text-content-faint">On this page</div>
           <ul className="grid gap-2 sm:grid-cols-2">
@@ -62,7 +63,6 @@ export default function DocsPage() {
           </ul>
         </nav>
 
-        {/* What is Flux */}
         <Section id="overview" title="What is Flux">
           <P>
             Flux is a payment-streaming app on Arc. Instead of paying in a single lump, money flows
@@ -84,19 +84,17 @@ export default function DocsPage() {
           />
         </Section>
 
-        {/* How it works */}
         <Section id="how" title="How streaming works">
           <Steps
             items={[
               ["Create a stream", "The sender escrows USDC and sets a start and end time."],
-              ["It vests linearly", "At any moment, the vested amount = total × time elapsed ÷ duration. Halfway through, half is the recipient's."],
+              ["It vests linearly", "At any moment, vested = total × time elapsed ÷ duration. Halfway through, half is the recipient's."],
               ["Withdraw anytime", "The recipient pulls whatever has vested but not yet been withdrawn — at second one or day thirty."],
               ["Cancel anytime", "Either party can stop the stream. The recipient keeps the streamed portion; the sender is refunded the remainder."],
             ]}
           />
         </Section>
 
-        {/* Getting started */}
         <Section id="start" title="Getting started">
           <P>You need three things before your first stream:</P>
           <Bullets
@@ -111,9 +109,7 @@ export default function DocsPage() {
             {NETWORK.map(([k, v], i) => (
               <div
                 key={k}
-                className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:justify-between ${
-                  i % 2 ? "bg-ink-900/40" : ""
-                }`}
+                className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:justify-between ${i % 2 ? "bg-ink-900/40" : ""}`}
               >
                 <span className="text-sm text-content-muted">{k}</span>
                 <span className="break-all font-mono text-sm text-content-hi">{v}</span>
@@ -128,7 +124,6 @@ export default function DocsPage() {
           <ExtLink href={LINKS.faucet}>Open the Circle faucet →</ExtLink>
         </Section>
 
-        {/* Open a stream */}
         <Section id="stream" title="Open a stream">
           <Steps
             items={[
@@ -141,7 +136,6 @@ export default function DocsPage() {
           <Note>You will see two wallet prompts: one to approve, one to open the stream.</Note>
         </Section>
 
-        {/* Withdraw & cancel */}
         <Section id="withdraw" title="Withdraw & cancel">
           <P>
             <B>Withdraw</B> — as the recipient, open the stream in Dashboard (Incoming) or Earnings
@@ -154,7 +148,6 @@ export default function DocsPage() {
           </P>
         </Section>
 
-        {/* Payment links */}
         <Section id="request" title="Payment links (get paid)">
           <P>
             A Flux payment link is how other people stream USDC to you — it is not you paying.
@@ -168,9 +161,41 @@ export default function DocsPage() {
             ]}
           />
           <Note>You cannot pay your own address — the payer must use a different wallet.</Note>
+          <P>
+            Want a permanent page with several tiers instead of a one-off link? See Flux Pages below.
+          </P>
         </Section>
 
-        {/* Earnings */}
+        <Section id="pages" title="Flux Pages">
+          <P>
+            A Flux Page is your own shareable streaming-payment page — like a tip page, but
+            supporters stream USDC to you by the second instead of paying once.
+          </P>
+          <Steps
+            items={[
+              ["Open the builder", "Go to the Page builder, set a display name, a short bio and an accent colour."],
+              ["Add your tiers", "Create your own tiers — each with a label, an amount and a duration (e.g. Coffee — 5 USDC over 7 days)."],
+              ["Copy & share", "Copy the link and put it in your bio, socials, or anywhere."],
+              ["Get paid", "A visitor picks a tier, connects their wallet and starts the stream; you watch it arrive in Earnings."],
+            ]}
+          />
+          <Note>The whole profile lives inside the link itself — no account or backend needed.</Note>
+        </Section>
+
+        <Section id="embed" title="Embed a button">
+          <P>
+            Turn your Flux Page (or any pay-link) into a button you can place anywhere — your GitHub
+            README, a blog, Notion, or a website.
+          </P>
+          <Steps
+            items={[
+              ["Open the Embed page", "Paste your Flux link and choose a button label."],
+              ["Copy a snippet", "Grab the HTML button for websites and blogs, or the Markdown badge for a GitHub README or Notion."],
+              ["Paste it anywhere", "Anyone who clicks it opens your link and can start streaming to you."],
+            ]}
+          />
+        </Section>
+
         <Section id="earnings" title="Earnings & export">
           <P>
             The Earnings page shows everything streaming to you: a live claimable total, how much you
@@ -182,7 +207,6 @@ export default function DocsPage() {
           </P>
         </Section>
 
-        {/* Bridge */}
         <Section id="bridge" title="Bridge out (CCTP)">
           <P>
             The Bridge page moves USDC you have received on Arc to another chain using Circle CCTP.
@@ -198,7 +222,6 @@ export default function DocsPage() {
           />
         </Section>
 
-        {/* FAQ */}
         <Section id="faq" title="FAQ">
           <div className="space-y-5">
             {FAQ.map(([q, a]) => (
@@ -210,7 +233,6 @@ export default function DocsPage() {
           </div>
         </Section>
 
-        {/* Resources */}
         <Section id="resources" title="Resources">
           <div className="flex flex-wrap gap-3">
             <ExtLink href={LINKS.github}>GitHub</ExtLink>
@@ -226,8 +248,6 @@ export default function DocsPage() {
     </div>
   );
 }
-
-/* ── small presentational helpers ──────────────────────────────────────── */
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
