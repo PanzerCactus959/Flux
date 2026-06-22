@@ -42,6 +42,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/embed" className="transition hover:text-content-hi">
+                  Embed button
+                </Link>
+              </li>
+              <li>
                 <a href={LINKS.github} target="_blank" rel="noreferrer" className="transition hover:text-content-hi">
                   GitHub
                 </a>
